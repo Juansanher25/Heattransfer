@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseñador de Intercambiador de Calor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group,
+        .result-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .input-group label,
+        .result-group label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #4b5563;
+        }
+
+        input[type="number"],
+        select {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        .result,
+        .equation-box {
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            overflow-x: auto;
+        }
+
+        .btn {
+            background-color: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #059669;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label-switch {
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        #comparison_table th, #comparison_table td {
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        #comparison_table th {
+            background-color: #f3f4f6;
+            font-weight: 700;
+        }
+        
+        .message-box {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-box.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .message-box.warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .message-box.info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        #cover_page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100vh;
+        }
+
+        #main_content {
+            display: none;
+        }
+        
+        .math-label {
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cover_page">
+        <h1 class="text-5xl font-extrabold text-blue-800">Curso de Transferencia de Calor II</h1>
+        <h2 class="text-3xl font-bold mt-4">Diseño de Intercambiador de Coraza y Tubos</h2>
+        <p class="mt-8 text-xl text-gray-700">Profesor: Ph.D. Juan Sandoval Herrera</p>
+        <p class="text-lg text-gray-500">Universidad de América</p>
+        <p class="text-lg text-gray-500">2025</p>
+        <button onclick="showMainContent()" class="mt-12 btn" style="background-color: #4f46e5;">Iniciar Diseño</button>
+    </div>
+
+    <div id="main_content" class="container">
+        <h1 class="text-center">Diseñador de Intercambiador de Calor</h1>
+        <p class="text-center text-gray-500 mb-6">Método de Kern</p>
+
+        <div id="design-form">
+            <h2 class="text-xl">Datos de Entrada</h2>
+            <div class="grid-container">
+                <!-- Flujos y Temperaturas -->
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Fluidos y Temperaturas</h3>
+                    <div class="input-group">
+                        <label for="flow_hot">Flujo del fluido caliente $\dot{m}_{h}$ (kg/s)</label>
+                        <input type="number" id="flow_hot" value="10" step="0.1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="flow_cold">Flujo del fluido frío $\dot{m}_{c}$ (kg/s)</label>
+                        <input type="number" id="flow_cold" value="15" step="0.1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="temp_hot_in">Temperatura de entrada caliente $T_{h,in}$ (°C)</label>
+                        <input type="number" id="temp_hot_in" value="100" step="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="temp_hot_out">Temperatura de salida caliente $T_{h,out}$ (°C)</label>
+                        <input type="number" id="temp_hot_out" value="60" step="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="temp_cold_in">Temperatura de entrada fría $T_{c,in}$ (°C)</label>
+                        <input type="number" id="temp_cold_in" value="20" step="1" required>
+                    </div>
+                </div>
+
+                <!-- Propiedades de los Fluidos -->
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Propiedades de los Fluidos</h3>
+                    <div class="input-group">
+                        <label for="cp_hot">Calor específico caliente $C_{p,h}$ (J/kg·K)</label>
+                        <input type="number" id="cp_hot" value="4186" step="10" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="cp_cold">Calor específico frío $C_{p,c}$ (J/kg·K)</label>
+                        <input type="number" id="cp_cold" value="4186" step="10" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="rho_hot">Densidad caliente $\rho_h$ (kg/m³)</label>
+                        <input type="number" id="rho_hot" value="1000" step="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="rho_cold">Densidad fría $\rho_c$ (kg/m³)</label>
+                        <input type="number" id="rho_cold" value="1000" step="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="visc_hot">Viscosidad caliente $\mu_h$ (Pa·s)</label>
+                        <input type="number" id="visc_hot" value="0.0005" step="0.0001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="visc_cold">Viscosidad fría $\mu_c$ (Pa·s)</label>
+                        <input type="number" id="visc_cold" value="0.0008" step="0.0001" required>
+                    </div>
+                </div>
+
+                <!-- Geometría del Intercambiador -->
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Parámetros Geométricos</h3>
+                    <div class="input-group">
+                        <label for="shell_diameter">Diámetro de la coraza $D_s$ (m)</label>
+                        <input type="number" id="shell_diameter" value="0.6" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="tube_length">Longitud de los tubos $L$ (m)</label>
+                        <input type="number" id="tube_length" value="4.8" step="0.1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="tube_outer_diameter">Diámetro exterior de los tubos $D_o$ (m)</label>
+                        <input type="number" id="tube_outer_diameter" value="0.019" step="0.001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="tube_inner_diameter">Diámetro interior de los tubos $D_i$ (m)</label>
+                        <input type="number" id="tube_inner_diameter" value="0.016" step="0.001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="baffle_spacing">Espaciado entre deflectores $B$ (m)</label>
+                        <input type="number" id="baffle_spacing" value="0.4" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="tube_pitch">Paso entre tubos $P_t$ (m)</label>
+                        <input type="number" id="tube_pitch" value="0.025" step="0.001" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-container">
+                 <!-- Coeficientes y Opciones -->
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Coeficientes y Opciones</h3>
+                    <div class="input-group">
+                        <label for="fouling_factor_hot">Factor de incrustación caliente $R_{f,h}$ (m²·K/W)</label>
+                        <input type="number" id="fouling_factor_hot" value="0.0002" step="0.0001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="fouling_factor_cold">Factor de incrustación frío $R_{f,c}$ (m²·K/W)</label>
+                        <input type="number" id="fouling_factor_cold" value="0.0002" step="0.0001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="shell_heat_coeff">Coef. conv. coraza $h_o$ (W/m²·K)</label>
+                        <input type="number" id="shell_heat_coeff" value="1000" step="10" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="tube_heat_coeff">Coef. conv. tubos $h_i$ (W/m²·K)</label>
+                        <input type="number" id="tube_heat_coeff" value="1500" step="10" required>
+                    </div>
+                    <div class="input-group flex-row items-center">
+                        <label for="flow_type" class="label-switch">Tipo de flujo:</label>
+                        <select id="flow_type" class="w-full">
+                            <option value="counter">Contraflujo</option>
+                            <option value="parallel">Paralelo</option>
+                        </select>
+                    </div>
+                    <div class="input-group flex-row items-center">
+                        <label for="fluid_assignment" class="label-switch">Asignación de fluidos:</label>
+                        <select id="fluid_assignment" class="w-full">
+                            <option value="hot_shell">Caliente por coraza / Frío por tubos</option>
+                            <option value="cold_shell">Frío por coraza / Caliente por tubos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-6 flex gap-4 justify-center">
+                <button onclick="calculateDesign()" class="btn">Calcular Diseño</button>
+                <button onclick="saveBaseScenario()" class="btn" style="background-color: #f59e0b;">Guardar como Escenario Base</button>
+            </div>
+        </div>
+
+        <div id="results" class="hidden">
+            <h2 class="text-xl">Resultados del Diseño</h2>
+            <div class="grid-container">
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Resultados Clave</h3>
+                    <div class="result-group">
+                        <label>Calor Transferido ($Q$)</label>
+                        <div id="heat_transfer" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Temperatura de salida frío ($T_{c,out}$)</label>
+                        <div id="temp_cold_out_calc" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Diferencia de Temperatura Media Logarítmica $(\Delta T_{lm})$</label>
+                        <div id="lmtd" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Factor de Corrección ($F_t$)</label>
+                        <div id="ft_factor" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Coeficiente Global de Transferencia ($U_o$)</label>
+                        <div id="overall_coeff" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Área de Transferencia Requerida ($A_{req}$)</label>
+                        <div id="required_area" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Área de Transferencia Suministrada ($A_{sup}$)</label>
+                        <div id="supplied_area" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Número de Tubos Requeridos ($N_t$)</label>
+                        <div id="num_tubes" class="result"></div>
+                    </div>
+                     <div class="result-group">
+                        <label>Caída de Presión en los Tubos ($\Delta P_{tubos}$)</label>
+                        <div id="pressure_drop_tube" class="result"></div>
+                    </div>
+                    <div class="result-group">
+                        <label>Caída de Presión en la Coraza ($\Delta P_{coraza}$)</label>
+                        <div id="pressure_drop_shell" class="result"></div>
+                    </div>
+                </div>
+                
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Ecuaciones Clave</h3>
+                    <div class="equation-box mb-4">
+                        <p>Calor Transferido:</p>
+                        $$Q = \dot{m}_{h}C_{p,h}(T_{h,in} - T_{h,out})$$
+                    </div>
+                    <div class="equation-box mb-4">
+                        <p>Diferencia de Temperatura Media Logarítmica (Contraflujo):</p>
+                        $$\Delta T_{lm} = \frac{(T_{h,in} - T_{c,out}) - (T_{h,out} - T_{c,in})}{\ln\left(\frac{T_{h,in} - T_{c,out}}{T_{h,out} - T_{c,in}}\right)}$$
+                    </div>
+                    <div class="equation-box mb-4">
+                        <p>Coeficiente Global de Transferencia ($U_o$):</p>
+                        $$\frac{1}{U_o} = \frac{1}{h_o} + \frac{A_o}{A_i}\frac{1}{h_i} + R_{f,o} + \frac{A_o}{A_i}R_{f,i} + \frac{A_o \ln(D_o/D_i)}{2\pi k_{tube} L}$$
+                    </div>
+                    <div class="equation-box mb-4">
+                        <p>Área Requerida ($A_{req}$):</p>
+                        $$A_{req} = \frac{Q}{U_o \Delta T_{lm} F_t}$$
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="comparison" class="hidden mt-8">
+            <h2 class="text-xl">Comparación de Escenarios</h2>
+            <div class="text-center mt-4">
+                <button onclick="compareScenarios()" class="btn" style="background-color: #3b82f6;">Comparar con Escenario Base</button>
+            </div>
+            <table id="comparison_table" class="mt-4 w-full table-auto rounded-lg overflow-hidden">
+                <thead>
+                    <tr>
+                        <th class="text-left">Parámetro</th>
+                        <th class="text-center">Escenario Base</th>
+                        <th class="text-center">Escenario Alternativo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas para la comparación se generarán aquí -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="sensitivity_analysis" class="hidden mt-8">
+            <h2 class="text-xl">Análisis de Sensibilidad</h2>
+            <div class="grid-container">
+                <div class="flex-col">
+                    <h3 class="font-bold mb-2">Variables a analizar</h3>
+                    <div class="input-group">
+                        <label for="sensitivity_param">Parámetro a variar</label>
+                        <select id="sensitivity_param" class="w-full" onchange="updateSensitivityLabels()">
+                            <option value="shell_diameter">Diámetro de la Coraza ($D_s$)</option>
+                            <option value="tube_length">Longitud de los Tubos ($L$)</option>
+                            <option value="baffle_spacing">Espaciado de Deflectores ($B$)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label id="start_label" for="start_val">Valor inicial (m)</label>
+                        <input type="number" id="start_val" value="0.4" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label id="end_label" for="end_val">Valor final (m)</label>
+                        <input type="number" id="end_val" value="0.8" step="0.01">
+                    </div>
+                    <button onclick="runSensitivityAnalysis()" class="btn" style="background-color: #ef4444;">Ejecutar Análisis</button>
+                </div>
+            </div>
+            <div class="mt-8" style="height: 500px;">
+                <canvas id="sensitivityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl">Selección de Intercambiador</h2>
+            <p class="text-gray-600 mb-4">Utiliza las siguientes preguntas para determinar el tipo de intercambiador de calor más adecuado para tu aplicación, según las normas TEMA. </p>
+            <div id="tema_questions">
+                <div class="input-group">
+                    <label>1. ¿Necesitas limpieza mecánica en el lado de los tubos?</label>
+                    <select id="q1_cleaning">
+                        <option value="no">No</option>
+                        <option value="yes">Sí</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>2. ¿El intercambiador debe soportar fluidos a alta presión en el lado de la coraza?</label>
+                    <select id="q2_pressure">
+                        <option value="no">No</option>
+                        <option value="yes">Sí</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>3. ¿Es crucial que el intercambiador sea económico?</label>
+                    <select id="q3_cost">
+                        <option value="no">No</option>
+                        <option value="yes">Sí</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>4. ¿Manejas fluidos tóxicos o peligrosos en el lado de la coraza?</label>
+                    <select id="q4_toxic">
+                        <option value="no">No</option>
+                        <option value="yes">Sí</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>5. ¿El rango de temperatura del fluido de la coraza es muy amplio?</label>
+                    <select id="q5_thermal_stress">
+                        <option value="no">No</option>
+                        <option value="yes">Sí</option>
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button onclick="getTemaRecommendation()" class="btn" style="background-color: #3b82f6;">Obtener Recomendación</button>
+            </div>
+            <div class="p-4 mt-4 bg-gray-50 border border-gray-200 rounded-md">
+                <p id="tema_recommendation" class="text-gray-700 italic">Aquí aparecerá tu recomendación de tipo de intercambiador de calor.</p>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl">Conclusiones</h2>
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                <p id="conclusions-text" class="text-gray-700 italic">Escribe tus conclusiones aquí, analizando los resultados del diseño y la comparación de escenarios. Considera cómo los cambios en los parámetros afectan el rendimiento y la eficiencia del intercambiador.</p>
+            </div>
+            <div class="mt-4 text-center">
+                <button onclick="generateConclusions()" class="btn" style="background-color: #f59e0b;">✨ Generar Conclusiones ✨</button>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <h2 class="text-xl">Sugerencias de Diseño ✨</h2>
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                <p id="optimization-suggestions" class="text-gray-700 italic">Haz clic en el botón de abajo para obtener sugerencias de optimización para tu diseño.</p>
+            </div>
+            <div class="mt-4 text-center">
+                <button onclick="generateOptimizationSuggestions()" class="btn" style="background-color: #10b981;">✨ Sugerencias de Optimización ✨</button>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl">Bibliografía</h2>
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                <p class="text-gray-700 italic">Añade aquí las referencias bibliográficas que utilizaste, por ejemplo:</p>
+                <ul class="list-disc list-inside mt-2 text-gray-700">
+                    <li>Kern, D. Q. (1950). <cite>Process Heat Transfer</cite>. McGraw-Hill.</li>
+                    <li>Kakac, S., & Liu, H. (2002). <cite>Heat Exchangers: Selection, Rating, and Thermal Design</cite>. CRC Press.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputs = {
+            flow_hot: document.getElementById('flow_hot'),
+            flow_cold: document.getElementById('flow_cold'),
+            temp_hot_in: document.getElementById('temp_hot_in'),
+            temp_hot_out: document.getElementById('temp_hot_out'),
+            temp_cold_in: document.getElementById('temp_cold_in'),
+            cp_hot: document.getElementById('cp_hot'),
+            cp_cold: document.getElementById('cp_cold'),
+            rho_hot: document.getElementById('rho_hot'),
+            rho_cold: document.getElementById('rho_cold'),
+            visc_hot: document.getElementById('visc_hot'),
+            visc_cold: document.getElementById('visc_cold'),
+            shell_diameter: document.getElementById('shell_diameter'),
+            tube_length: document.getElementById('tube_length'),
+            tube_outer_diameter: document.getElementById('tube_outer_diameter'),
+            tube_inner_diameter: document.getElementById('tube_inner_diameter'),
+            baffle_spacing: document.getElementById('baffle_spacing'),
+            tube_pitch: document.getElementById('tube_pitch'),
+            fouling_factor_hot: document.getElementById('fouling_factor_hot'),
+            fouling_factor_cold: document.getElementById('fouling_factor_cold'),
+            shell_heat_coeff: document.getElementById('shell_heat_coeff'),
+            tube_heat_coeff: document.getElementById('tube_heat_coeff'),
+            flow_type: document.getElementById('flow_type'),
+            fluid_assignment: document.getElementById('fluid_assignment')
+        };
+
+        const results = {
+            heat_transfer: document.getElementById('heat_transfer'),
+            temp_cold_out_calc: document.getElementById('temp_cold_out_calc'),
+            lmtd: document.getElementById('lmtd'),
+            ft_factor: document.getElementById('ft_factor'),
+            overall_coeff: document.getElementById('overall_coeff'),
+            required_area: document.getElementById('required_area'),
+            supplied_area: document.getElementById('supplied_area'),
+            num_tubes: document.getElementById('num_tubes'),
+            pressure_drop_tube: document.getElementById('pressure_drop_tube'),
+            pressure_drop_shell: document.getElementById('pressure_drop_shell')
+        };
+        
+        let baseScenario = null;
+        let myChart = null;
+        const G_C = 9.81; // Acceleration due to gravity (m/s^2), used here as a constant
+
+        function showMainContent() {
+            document.getElementById('cover_page').style.display = 'none';
+            document.getElementById('main_content').style.display = 'block';
+        }
+
+        function showMessage(message, type = 'info') {
+            const messageBox = document.createElement('div');
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`;
+            document.body.appendChild(messageBox);
+
+            setTimeout(() => {
+                messageBox.remove();
+            }, 5000);
+        }
+
+        function calculateDesign() {
+            try {
+                // Obtener valores de los inputs
+                const Q_h = parseFloat(inputs.flow_hot.value) * parseFloat(inputs.cp_hot.value) * (parseFloat(inputs.temp_hot_in.value) - parseFloat(inputs.temp_hot_out.value));
+                const temp_cold_out = parseFloat(inputs.temp_cold_in.value) + Q_h / (parseFloat(inputs.flow_cold.value) * parseFloat(inputs.cp_cold.value));
+
+                if (parseFloat(inputs.temp_hot_out.value) < temp_cold_out) {
+                    showMessage('¡Advertencia! La temperatura de salida del fluido caliente no debe ser menor que la temperatura de salida del fluido frío. Por favor, ajusta los valores.', 'warning');
+                    return;
+                }
+
+                // Cálculo de LMTD
+                let deltaT1, deltaT2;
+                if (inputs.flow_type.value === 'counter') {
+                    deltaT1 = parseFloat(inputs.temp_hot_in.value) - temp_cold_out;
+                    deltaT2 = parseFloat(inputs.temp_hot_out.value) - parseFloat(inputs.temp_cold_in.value);
+                } else {
+                    deltaT1 = parseFloat(inputs.temp_hot_in.value) - parseFloat(inputs.temp_cold_in.value);
+                    deltaT2 = parseFloat(inputs.temp_hot_out.value) - temp_cold_out;
+                }
+                const lmtd_val = (deltaT1 - deltaT2) / Math.log(deltaT1 / deltaT2);
+                
+                // Coeficiente Global de Transferencia (Uo)
+                const Do = parseFloat(inputs.tube_outer_diameter.value);
+                const Di = parseFloat(inputs.tube_inner_diameter.value);
+                const hi = parseFloat(inputs.tube_heat_coeff.value);
+                const ho = parseFloat(inputs.shell_heat_coeff.value);
+                const Rfi = parseFloat(inputs.fouling_factor_cold.value);
+                const Rfo = parseFloat(inputs.fouling_factor_hot.value);
+                const k_tube = 50; // Conductividad térmica del material del tubo (W/m·K), valor asumido.
+
+                const Uo_val = 1 / ((1 / ho) + Rfo + (1 / hi + Rfi) * (Do / Di) + (Do * Math.log(Do / Di)) / (2 * k_tube));
+
+                // Factor de corrección (Ft), valor asumido por simplicidad
+                const ft_val = 0.85;
+
+                // Área requerida y número de tubos
+                const required_area = Q_h / (Uo_val * lmtd_val * ft_val);
+                const tube_length = parseFloat(inputs.tube_length.value);
+                const num_tubes = Math.ceil(required_area / (Math.PI * Do * tube_length));
+                const supplied_area = num_tubes * Math.PI * Do * tube_length;
+
+                // Definir fluidos según la asignación
+                let tube_fluid_flow, tube_fluid_rho, tube_fluid_visc;
+                let shell_fluid_flow, shell_fluid_rho, shell_fluid_visc;
+
+                if (inputs.fluid_assignment.value === 'hot_shell') {
+                    tube_fluid_flow = parseFloat(inputs.flow_cold.value);
+                    tube_fluid_rho = parseFloat(inputs.rho_cold.value);
+                    tube_fluid_visc = parseFloat(inputs.visc_cold.value);
+                    shell_fluid_flow = parseFloat(inputs.flow_hot.value);
+                    shell_fluid_rho = parseFloat(inputs.rho_hot.value);
+                    shell_fluid_visc = parseFloat(inputs.visc_hot.value);
+                } else {
+                    tube_fluid_flow = parseFloat(inputs.flow_hot.value);
+                    tube_fluid_rho = parseFloat(inputs.rho_hot.value);
+                    tube_fluid_visc = parseFloat(inputs.visc_hot.value);
+                    shell_fluid_flow = parseFloat(inputs.flow_cold.value);
+                    shell_fluid_rho = parseFloat(inputs.rho_cold.value);
+                    shell_fluid_visc = parseFloat(inputs.visc_cold.value);
+                }
+
+                // Cálculo de caída de presión en tubos (lado frío)
+                // Implementando la fórmula del usuario
+                const At = num_tubes * (Math.PI * Math.pow(Di, 2) / 4);
+                const v_tubes = tube_fluid_flow / (tube_fluid_rho * At);
+                const Re_tubes = (tube_fluid_rho * v_tubes * Di) / tube_fluid_visc;
+                let f_tubes;
+                if (Re_tubes < 2100) {
+                    f_tubes = 16 / Re_tubes;
+                } else {
+                    f_tubes = 0.046 / Math.pow(Re_tubes, 0.2);
+                }
+                const L_tot = tube_length; // Asumiendo un solo paso por tubo para simplificar
+                const Np = 2; // Número de pasos por tubos, valor asumido
+                const pressure_drop_tube_val = (4 * f_tubes * L_tot / Di) * (tube_fluid_rho * Math.pow(v_tubes, 2) / (2 * G_C)) * Np + (4 * Np * Math.pow(v_tubes, 2) * tube_fluid_rho) / (2 * G_C);
+
+                // Cálculo de caída de presión en coraza (lado caliente)
+                // Implementando la fórmula del usuario
+                const De = (4 * (Math.pow(parseFloat(inputs.tube_pitch.value), 2) - (Math.PI * Math.pow(Do, 2) / 4))) / (Math.PI * Do);
+                const B = parseFloat(inputs.baffle_spacing.value);
+                const Ds = parseFloat(inputs.shell_diameter.value);
+                const As = (Ds * B * (parseFloat(inputs.tube_pitch.value) - Do)) / parseFloat(inputs.tube_pitch.value);
+                const Gs = shell_fluid_flow / As;
+                const Re_shell = (Gs * De) / shell_fluid_visc;
+                let f_shell;
+                if (Re_shell < 2100) {
+                     f_shell = 16 / Re_shell; // Valor simplificado, en realidad depende del arreglo
+                } else {
+                     f_shell = 0.046 / Math.pow(Re_shell, 0.2);
+                }
+                const Nb = Math.floor(tube_length / baffle_spacing); // Número de deflectores
+                const pressure_drop_shell_val = f_shell * Math.pow(Gs, 2) * Ds * (Nb + 1) / (2 * shell_fluid_rho * De);
+
+                // Mostrar resultados
+                results.heat_transfer.textContent = `${(Q_h / 1000).toFixed(2)} kW`;
+                results.temp_cold_out_calc.textContent = `${temp_cold_out.toFixed(2)} °C`;
+                results.lmtd.textContent = `${lmtd_val.toFixed(2)} °C`;
+                results.ft_factor.textContent = ft_val.toFixed(2);
+                results.overall_coeff.textContent = `${Uo_val.toFixed(2)} W/m²·K`;
+                results.required_area.textContent = `${required_area.toFixed(2)} m²`;
+                results.supplied_area.textContent = `${supplied_area.toFixed(2)} m²`;
+                results.num_tubes.textContent = Math.ceil(num_tubes);
+                results.pressure_drop_tube.textContent = `${(pressure_drop_tube_val / 1000).toFixed(4)} kPa`;
+                results.pressure_drop_shell.textContent = `${(pressure_drop_shell_val / 1000).toFixed(4)} kPa`;
+
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('comparison').classList.remove('hidden');
+                document.getElementById('sensitivity_analysis').classList.remove('hidden');
+                
+                MathJax.typesetPromise();
+                
+                // Devolver resultados para su uso en otras funciones
+                return {
+                    heat_transfer: Q_h,
+                    lmtd: lmtd_val,
+                    ft: ft_val,
+                    overall_coeff: Uo_val,
+                    required_area: required_area,
+                    num_tubes: num_tubes,
+                    pressure_drop_tube: pressure_drop_tube_val,
+                    pressure_drop_shell: pressure_drop_shell_val,
+                    effectiveness: calculateEffectiveness(Uo_val, required_area)
+                };
+
+            } catch (error) {
+                showMessage('Ocurrió un error. Por favor, verifica que todos los campos estén llenos y sean válidos.', 'error');
+                console.error(error);
+            }
+        }
+
+        function calculateEffectiveness(Uo_val, required_area) {
+            const C_hot = parseFloat(inputs.flow_hot.value) * parseFloat(inputs.cp_hot.value);
+            const C_cold = parseFloat(inputs.flow_cold.value) * parseFloat(inputs.cp_cold.value);
+            const C_min = Math.min(C_hot, C_cold);
+            const C_max = Math.max(C_hot, C_cold);
+            const C_ratio = C_min / C_max;
+            const ntu_val = Uo_val * required_area / C_min;
+            
+            let effectiveness_val;
+            if (inputs.flow_type.value === 'counter') {
+                if (C_ratio === 1) {
+                    effectiveness_val = ntu_val / (1 + ntu_val);
+                } else {
+                    effectiveness_val = (1 - Math.exp(-ntu_val * (1 - C_ratio))) / (1 - C_ratio * Math.exp(-ntu_val * (1 - C_ratio)));
+                }
+            } else {
+                 effectiveness_val = (1 - Math.exp(-ntu_val * (1 + C_ratio))) / (1 + C_ratio);
+            }
+            return effectiveness_val;
+        }
+
+        function saveBaseScenario() {
+            baseScenario = {
+                values: {
+                    flow_hot: parseFloat(inputs.flow_hot.value),
+                    flow_cold: parseFloat(inputs.flow_cold.value),
+                    temp_hot_in: parseFloat(inputs.temp_hot_in.value),
+                    temp_hot_out: parseFloat(inputs.temp_hot_out.value),
+                    temp_cold_in: parseFloat(inputs.temp_cold_in.value),
+                    shell_diameter: parseFloat(inputs.shell_diameter.value),
+                    tube_length: parseFloat(inputs.tube_length.value),
+                    tube_outer_diameter: parseFloat(inputs.tube_outer_diameter.value),
+                    baffle_spacing: parseFloat(inputs.baffle_spacing.value),
+                    tube_pitch: parseFloat(inputs.tube_pitch.value),
+                    flow_type: inputs.flow_type.value,
+                    fluid_assignment: inputs.fluid_assignment.value
+                },
+                results: calculateDesign()
+            };
+            showMessage("Escenario base guardado. Puedes modificar los parámetros ahora para comparar.", 'success');
+        }
+
+        function compareScenarios() {
+            if (!baseScenario) {
+                showMessage("Por favor, guarda un escenario base primero.", 'warning');
+                return;
+            }
+
+            const currentResults = calculateDesign();
+            const tableBody = document.querySelector('#comparison_table tbody');
+            tableBody.innerHTML = '';
+
+            const dataToCompare = [
+                { label: 'Calor Transferido (kW)', base: (baseScenario.results.heat_transfer / 1000).toFixed(2), current: (currentResults.heat_transfer / 1000).toFixed(2) },
+                { label: 'Uo (W/m²·K)', base: baseScenario.results.overall_coeff.toFixed(2), current: currentResults.overall_coeff.toFixed(2) },
+                { label: 'Área Requerida (m²)', base: baseScenario.results.required_area.toFixed(2), current: currentResults.required_area.toFixed(2) },
+                { label: 'Número de Tubos', base: Math.ceil(baseScenario.results.num_tubes), current: Math.ceil(currentResults.num_tubes) },
+                { label: 'ΔP Tubos (kPa)', base: (baseScenario.results.pressure_drop_tube / 1000).toFixed(4), current: (currentResults.pressure_drop_tube / 1000).toFixed(4) },
+                { label: 'ΔP Coraza (kPa)', base: (baseScenario.results.pressure_drop_shell / 1000).toFixed(4), current: (currentResults.pressure_drop_shell / 1000).toFixed(4) },
+                { label: 'Efectividad (%)', base: (baseScenario.results.effectiveness * 100).toFixed(2), current: (currentResults.effectiveness * 100).toFixed(2) }
+            ];
+
+            dataToCompare.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-left">${item.label}</td>
+                    <td class="text-center">${item.base}</td>
+                    <td class="text-center">${item.current}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function updateSensitivityLabels() {
+            const param = document.getElementById('sensitivity_param').value;
+            const startLabel = document.getElementById('start_label');
+            const endLabel = document.getElementById('end_label');
+            
+            let units = '';
+            let labelText = '';
+
+            switch(param) {
+                case 'shell_diameter':
+                    units = ' (m)';
+                    labelText = `Diámetro de la Coraza ($D_s$)`;
+                    break;
+                case 'tube_length':
+                    units = ' (m)';
+                    labelText = `Longitud de los Tubos ($L$)`;
+                    break;
+                case 'baffle_spacing':
+                    units = ' (m)';
+                    labelText = `Espaciado de Deflectores ($B$)`;
+                    break;
+            }
+
+            startLabel.innerHTML = `Valor inicial: ${labelText}${units}`;
+            endLabel.innerHTML = `Valor final: ${labelText}${units}`;
+            
+            MathJax.typesetPromise();
+        }
+
+        function runSensitivityAnalysis() {
+            const param = document.getElementById('sensitivity_param').value;
+            const startVal = parseFloat(document.getElementById('start_val').value);
+            const endVal = parseFloat(document.getElementById('end_val').value);
+            const numPoints = 20;
+            const step = (endVal - startVal) / (numPoints - 1);
+
+            const labels = [];
+            const effectivenessData = [];
+            const pressureDropTubeData = [];
+            const pressureDropShellData = [];
+            const UoData = [];
+
+            const originalValue = parseFloat(inputs[param].value);
+
+            for (let i = 0; i < numPoints; i++) {
+                const val = startVal + i * step;
+                inputs[param].value = val;
+                const results = calculateDesign();
+                if (results) {
+                    labels.push(val.toFixed(2));
+                    effectivenessData.push((results.effectiveness * 100).toFixed(2));
+                    pressureDropTubeData.push((results.pressure_drop_tube / 1000).toFixed(4));
+                    pressureDropShellData.push((results.pressure_drop_shell / 1000).toFixed(4));
+                    UoData.push(results.overall_coeff.toFixed(2));
+                }
+            }
+            
+            // Restaurar el valor original del input
+            inputs[param].value = originalValue;
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const ctx = document.getElementById('sensitivityChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Efectividad (%)',
+                            data: effectivenessData,
+                            borderColor: '#3b82f6',
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Caída de Presión Tubos (kPa)',
+                            data: pressureDropTubeData,
+                            borderColor: '#ef4444',
+                            yAxisID: 'y2',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Caída de Presión Coraza (kPa)',
+                            data: pressureDropShellData,
+                            borderColor: '#f59e0b',
+                            yAxisID: 'y2',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Uo (W/m²·K)',
+                            data: UoData,
+                            borderColor: '#10b981',
+                            yAxisID: 'y3',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: `Variación de ${document.getElementById('sensitivity_param').options[document.getElementById('sensitivity_param').selectedIndex].text}`
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Efectividad (%)'
+                            },
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Caída de Presión (kPa)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                         y3: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Uo (W/m²·K)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toFixed(0);
+                                }
+                            }
+                        },
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initial call to set labels correctly
+        window.onload = function() {
+            updateSensitivityLabels();
+        };
+
+        function getTemaRecommendation() {
+            const cleaning = document.getElementById('q1_cleaning').value;
+            const pressure = document.getElementById('q2_pressure').value;
+            const cost = document.getElementById('q3_cost').value;
+            const toxic = document.getElementById('q4_toxic').value;
+            const thermalStress = document.getElementById('q5_thermal_stress').value;
+
+            let recommendation = "";
+            let explanation = "";
+
+            if (cleaning === 'yes' && pressure === 'yes' && cost === 'no' && toxic === 'no' && thermalStress === 'yes') {
+                recommendation = "Tipo AJS (Cabezal flotante con tubo de expansión)";
+                explanation = "Este tipo es ideal para fluidos que requieren limpieza mecánica en los tubos, manejan alta presión en la coraza y son resistentes a los esfuerzos térmicos. Aunque su costo es elevado, es una opción segura y robusta.";
+            } else if (cleaning === 'yes' && pressure === 'yes' && cost === 'no' && toxic === 'yes' && thermalStress === 'no') {
+                recommendation = "Tipo BEM (Cabezal estacionario, de tubo fijo)";
+                explanation = "El BEM es una opción económica y segura para fluidos tóxicos o peligrosos, ya que minimiza el riesgo de fugas. Si la limpieza no es un problema, es una excelente alternativa.";
+            } else if (cleaning === 'no' && pressure === 'yes' && cost === 'yes' && toxic === 'no' && thermalStress === 'no') {
+                recommendation = "Tipo BEU (Cabezal estacionario, de tubo fijo)";
+                explanation = "El BEU es el tipo más simple y económico, ideal para aplicaciones donde no se requiere limpieza frecuente y se manejan presiones altas. Es una excelente opción si el presupuesto es una restricción importante.";
+            } else {
+                recommendation = "No hay un tipo TEMA estándar que se ajuste exactamente a tus necesidades. Considera el tipo BEU, que es el más común y versátil, a menos que tu aplicación requiera algo específico como la limpieza mecánica o el control de expansión térmica.";
+                explanation = "El tipo BEU es una opción segura, ya que es el más utilizado. Si tus requisitos son muy específicos, te recomendamos consultar un manual de selección más detallado o un experto en intercambiadores de calor.";
+            }
+
+            document.getElementById('tema_recommendation').textContent = `${recommendation}. ${explanation}`;
+        }
+
+
+        async function generateOptimizationSuggestions() {
+            document.getElementById('optimization-suggestions').textContent = 'Generando sugerencias...';
+            
+            const selectedTema = document.getElementById('tema_recommendation').textContent;
+            
+            const resultsData = {
+                heat_transfer_kW: parseFloat(results.heat_transfer.textContent),
+                overall_coeff: parseFloat(results.overall_coeff.textContent),
+                required_area: parseFloat(results.required_area.textContent),
+                num_tubes: parseInt(results.num_tubes.textContent),
+                pressure_drop_tube: parseFloat(results.pressure_drop_tube.textContent),
+                pressure_drop_shell: parseFloat(results.pressure_drop_shell.textContent),
+                effectiveness: calculateEffectiveness(parseFloat(results.overall_coeff.textContent), parseFloat(results.required_area.textContent))
+            };
+
+            const prompt = `Actúa como un ingeniero experto en diseño de intercambiadores de calor. Analiza los siguientes resultados de diseño y la recomendación de tipo TEMA para proporcionar 3 a 5 sugerencias concretas y técnicas para optimizar este intercambiador. Enfócate en mejorar la eficiencia térmica, reducir las caídas de presión y ajustar la geometría para un diseño más compacto o rentable.
+            
+            Recomendación TEMA para el diseño: ${selectedTema}
+            Datos del diseño actual (en formato JSON): ${JSON.stringify(resultsData)}
+            
+            Sugerencias:`;
+
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "Eres un ingeniero químico con especialización en transferencia de calor. Tu tarea es analizar diseños de intercambiadores de calor y ofrecer sugerencias de optimización basadas en principios de ingeniería." }]
+                }
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudieron generar sugerencias. Intenta nuevamente.";
+                document.getElementById('optimization-suggestions').textContent = text;
+            } catch (error) {
+                document.getElementById('optimization-suggestions').textContent = "Error al conectar con la API de Gemini. Por favor, revisa tu conexión.";
+                console.error('Error fetching from Gemini API:', error);
+            }
+        }
+
+        async function generateConclusions() {
+            document.getElementById('conclusions-text').textContent = 'Generando conclusiones...';
+
+            if (!baseScenario) {
+                document.getElementById('conclusions-text').textContent = 'Por favor, primero guarda un escenario base y un escenario alternativo para generar conclusiones de comparación.';
+                return;
+            }
+
+            const currentResults = calculateDesign();
+            const prompt = `Escribe un breve párrafo de conclusiones para un informe de diseño de un intercambiador de calor de coraza y tubos. Compara el escenario base con el escenario alternativo basándote en los siguientes resultados:
+
+            Resultados del Escenario Base:
+            - Calor Transferido: ${(baseScenario.results.heat_transfer / 1000).toFixed(2)} kW
+            - Coeficiente Global (Uo): ${baseScenario.results.overall_coeff.toFixed(2)} W/m²·K
+            - Área Requerida: ${baseScenario.results.required_area.toFixed(2)} m²
+            - Número de Tubos: ${Math.ceil(baseScenario.results.num_tubes)}
+            - Caída de Presión en Tubos: ${(baseScenario.results.pressure_drop_tube / 1000).toFixed(4)} kPa
+            - Caída de Presión en Coraza: ${(baseScenario.results.pressure_drop_shell / 1000).toFixed(4)} kPa
+            - Efectividad: ${(baseScenario.results.effectiveness * 100).toFixed(2)} %
+
+            Resultados del Escenario Alternativo:
+            - Calor Transferido: ${(currentResults.heat_transfer / 1000).toFixed(2)} kW
+            - Coeficiente Global (Uo): ${currentResults.overall_coeff.toFixed(2)} W/m²·K
+            - Área Requerida: ${currentResults.required_area.toFixed(2)} m²
+            - Número de Tubos: ${Math.ceil(currentResults.num_tubes)}
+            - Caída de Presión en Tubos: ${(currentResults.pressure_drop_tube / 1000).toFixed(4)} kPa
+            - Caída de Presión en Coraza: ${(currentResults.pressure_drop_shell / 1000).toFixed(4)} kPa
+            - Efectividad: ${(currentResults.effectiveness * 100).toFixed(2)} %
+
+            Destaca los cambios más importantes en la eficiencia, el tamaño y la presión, y concluye sobre cuál diseño es más favorable y por qué.`;
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "Eres un analista técnico. Tu tarea es comparar dos conjuntos de datos de ingeniería y redactar un párrafo conciso y profesional con los hallazgos clave." }]
+                }
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudieron generar las conclusiones. Intenta nuevamente.";
+                document.getElementById('conclusions-text').textContent = text;
+            } catch (error) {
+                document.getElementById('conclusions-text').textContent = "Error al conectar con la API de Gemini. Por favor, revisa tu conexión.";
+                console.error('Error fetching from Gemini API:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
